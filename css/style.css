@@ -626,6 +626,7 @@ header ul li:before {
   -webkit-transform: translateX(-50%);
       -ms-transform: translateX(-50%);
           transform: translateX(-50%);
+  transition: 0.2s;
 }
 .overlay .popup-close {
   position: absolute;
