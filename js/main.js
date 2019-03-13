@@ -148,42 +148,57 @@ window.addEventListener('DOMContentLoaded', function () {
             input = form.getElementsByTagName('input'),
             statusMessege = document.createElement('div');
         
-        statusMessege.classList.add('status');
+            statusMessege.classList.add('status');
 
         form.addEventListener('submit', function(event) {
             event.preventDefault(); 
             form.appendChild(statusMessege);
-
-            let request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
-            // request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-            request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
-
             let formData = new FormData(form);
-            
+
             // Если отправляем данные в JSON
             let obj = {};
-            formData.forEach(function(value,key) {
+            formData.forEach(function (value, key) {
                 obj[key] = value;
             });
             let json = JSON.stringify(obj);
+            
+            function postData(data) {
+                
+                return new Promise(function(resolve, reject) {
+                    let request = new XMLHttpRequest();
+                    request.open('POST', 'server.php');
+                    // request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                    request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
 
-            request.send(json);
-            // request.send(FormData);
+                    request.onreadystatechange = function() {
+                        if (request.readyState < 4) {
+                            resolve()
+                        } else if(request.readyState === 4) {
+                            if (request.status == 200 && request.status < 300) {
+                                resolve()
+                            }
+                            else {
+                                reject()
+                            }                            
+                        };
+                    }
+                    
+                    request.send(data);
+                })
+            } //end postData
 
-            request.addEventListener('readystatechange', function() {
-                if (request.readyState < 4) {
-                    statusMessege.innerHTML = messege.loading;
-                } else if(request.readyState === 4 && request.status == 200) {
-                    statusMessege.innerHTML = messege.success;
-                } else {
-                    statusMessege.innerHTML = messege.failure;
+            function clearInputs() {           
+                for (let i = 0; i < input.length; i++) {
+                    input[i].value = '';
                 }
-            });
-
-            for (let i = 0; i < input.length; i++) {
-                input[i].value = '';
             }
+
+            // postData(formData)
+            postData(json)
+                .then(()=> statusMessege.innerHTML = messege.loading)
+                .then(() => statusMessege.innerHTML = messege.success)
+                .catch(()=> statusMessege.innerHTML = messege.failure)
+                .then(clearInputs)
         });
     }
 
